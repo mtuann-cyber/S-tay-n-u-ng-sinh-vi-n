@@ -37,14 +37,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            sendPasswordResetEmail
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD-DemoKeyForStudentDanangApp-999",
@@ -58,19 +50,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const auth = getAuth(app);
 
         window.dbRef = ref(db, 'places');
         window.firebaseModules = { push, ref, onValue };
-        window.authModules = {
-            auth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            onAuthStateChanged,
-            sendPasswordResetEmail,
-            set, get, ref, db
-        };
 
         if (window.initFirebaseSync) {
             window.initFirebaseSync();
@@ -148,29 +130,32 @@
             </button>
             <button onclick="switchTab('profile')" id="nav-profile"
                 class="flex flex-col items-center space-y-1 text-slate-400 hover:text-slate-600 transition">
-                <i data-lucide="user" class="w-5 h-5"></i>
-                <span class="text-[10px] font-medium">Cá nhân</span>
+                <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">Đóng góp</span>
             </button>
         </nav>
     </div>
 
-    <!-- Add / Edit Modal -->
+    <!-- Add / Edit Modal (Cải tiến phần đóng góp quán ăn phong phú hơn) -->
     <div id="placeModal"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div
             class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-100 max-h-[85vh] flex flex-col">
-            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                <h3 id="modalTitle" class="text-sm font-bold text-slate-800">Thêm quán ăn sinh viên</h3>
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+                <div>
+                    <h3 id="modalTitle" class="text-sm font-bold">✨ Đóng góp Quán Ngon Chung</h3>
+                    <p class="text-[10px] text-orange-100">Chia sẻ địa điểm để cộng đồng sinh viên cùng thưởng thức!</p>
+                </div>
                 <button onclick="closeAddModal()"
-                    class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition">
+                    class="p-1.5 text-white/80 hover:text-white rounded-full hover:bg-white/20 transition">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             <form id="placeForm" onsubmit="handleFormSubmit(event)"
                 class="p-5 overflow-y-auto space-y-3.5 flex-1 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Tên quán *</label>
-                    <input type="text" id="placeName" required placeholder="Ví dụ: Mì Quảng Bà Mua, Cafe 1999..."
+                    <label class="block font-semibold text-slate-700 mb-1">Tên quán ăn / Cafe *</label>
+                    <input type="text" id="placeName" required placeholder="Ví dụ: Cơm gà Bà Buôn, Quán ăn vặt Cô Ba..."
                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
 
@@ -213,22 +198,14 @@
                             <option value="ĐH FPT Đà Nẵng">ĐH FPT Đà Nẵng</option>
                             <option value="ĐH Kiến Trúc Đà Nẵng">ĐH Kiến Trúc Đà Nẵng</option>
                             <option value="ĐH Đông Á">ĐH Đông Á</option>
-                            <option value="ĐH Thể Dục Thể Thao Đà Nẵng">ĐH Thể Dục Thể Thao Đà Nẵng</option>
-                            <option value="Phân hiệu ĐH Kiến trúc TP.HCM tại ĐN">Phân hiệu ĐH Kiến trúc TP.HCM tại ĐN
-                            </option>
                             <option value="CĐ Thương Mại">CĐ Thương Mại</option>
                             <option value="CĐ Nghề Đà Nẵng">CĐ Nghề Đà Nẵng</option>
-                            <option value="CĐ Công nghệ, Kinh tế và Thủy sản">CĐ Công nghệ, Kinh tế và Thủy sản</option>
-                            <option value="CĐ Quốc tế Pegasus">CĐ Quốc tế Pegasus</option>
-                            <option value="CĐ Phương Đông Đà Nẵng">CĐ Phương Đông Đà Nẵng</option>
-                            <option value="CĐ Văn hóa Nghệ thuật Đà Nẵng">CĐ Văn hóa Nghệ thuật Đà Nẵng</option>
-                            <option value="CĐ Lạc Việt">CĐ Lạc Việt</option>
                             <option value="CĐ FPT Polytechnic Đà Nẵng">CĐ FPT Polytechnic Đà Nẵng</option>
                             <option value="Khu vực Khác">Khu vực Khác</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Điểm đánh giá</label>
+                        <label class="block font-semibold text-slate-700 mb-1">Đánh giá chung</label>
                         <select id="placeRating"
                             class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
                             <option value="5.0">⭐⭐⭐⭐⭐ (5.0)</option>
@@ -240,20 +217,20 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Địa chỉ / Tên đường</label>
-                    <input type="text" id="placeAddress" placeholder="Ví dụ: 54 Nguyễn Lương Bằng..."
+                    <label class="block font-semibold text-slate-700 mb-1">Địa chỉ cụ thể / Tên đường</label>
+                    <input type="text" id="placeAddress" placeholder="Ví dụ: 54 Nguyễn Lương Bằng, Liên Chiểu..."
                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Link Ảnh quán</label>
-                    <input type="url" id="placeImage" placeholder="https://example.com/photo.jpg"
+                    <label class="block font-semibold text-slate-700 mb-1">Link Ảnh minh họa (URL)</label>
+                    <input type="url" id="placeImage" placeholder="https://images.unsplash.com/..."
                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Review nhanh cho sinh viên</label>
-                    <textarea id="placeReview" rows="2" placeholder="Quán rộng, có wifi mạnh, cô chủ dễ tính..."
+                    <label class="block font-semibold text-slate-700 mb-1">Review nhanh chân thực cho sinh viên</label>
+                    <textarea id="placeReview" rows="2" placeholder="Quán rộng rãi, cô chủ nhiệt tình, đồ ăn nhiều và hợp khẩu vị..."
                         class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"></textarea>
                 </div>
 
@@ -261,57 +238,12 @@
                     <button type="button" onclick="closeAddModal()"
                         class="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Hủy</button>
                     <button type="submit"
-                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100">Đóng
-                        góp quán</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Auth Modal (Đăng nhập / Đăng ký) -->
-    <div id="authModal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div
-            class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-6 space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 id="authModalTitle" class="text-base font-bold text-slate-800">Đăng nhập tài khoản</h3>
-                <button onclick="closeAuthModal()"
-                    class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-
-            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Email</label>
-                    <input type="email" id="authEmail" required placeholder="name@example.com"
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Mật khẩu</label>
-                    <input type="password" id="authPassword" required placeholder="••••••••"
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
-                </div>
-
-                <!-- Nút Quên mật khẩu -->
-                <div class="text-right">
-                    <button type="button" onclick="handleForgotPassword()"
-                        class="text-[11px] text-orange-600 hover:underline font-medium">
-                        Quên mật khẩu?
+                        class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100 flex items-center space-x-1.5">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span>Đóng góp ngay</span>
                     </button>
                 </div>
-
-                <button type="submit" id="authSubmitBtn"
-                    class="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100">
-                    Đăng nhập
-                </button>
             </form>
-
-            <div class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
-                <span id="authToggleText">Chưa có tài khoản?</span>
-                <button onclick="toggleAuthMode()" id="authToggleBtn"
-                    class="text-orange-600 font-semibold ml-1 hover:underline">Đăng ký ngay</button>
-            </div>
         </div>
     </div>
 
@@ -530,6 +462,7 @@
         ];
 
         let places = [...defaultPlaces];
+        // Lưu trữ cá nhân trên thiết bị (localStorage)
         let savedIds = JSON.parse(localStorage.getItem('student_danang_saved_ids')) || [];
         let currentTab = 'explore';
         let currentCategory = 'Tất cả';
@@ -537,24 +470,8 @@
         let currentUniversityFilter = 'Tất cả';
         let currentSearchQuery = '';
         let selectedPlaceIdForDetail = null;
-        let currentUser = null;
-        let isRegisterMode = false;
 
-        // Lắng nghe trạng thái Auth từ Firebase
-        setTimeout(() => {
-            if (window.authModules) {
-                window.authModules.onAuthStateChanged(window.authModules.auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        loadUserDataFromFirebase(user.uid);
-                    } else {
-                        savedIds = JSON.parse(localStorage.getItem('student_danang_saved_ids')) || [];
-                        renderTabContent();
-                    }
-                });
-            }
-        }, 500);
-
+        // Đồng bộ dữ liệu realtime từ Firebase (nếu có)
         window.initFirebaseSync = function () {
             window.firebaseModules.onValue(window.dbRef, (snapshot) => {
                 const data = snapshot.val();
@@ -761,12 +678,13 @@
                 <div class="p-4 space-y-4 text-xs">
                     <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <h3 class="font-bold text-slate-800 text-sm">Quán đã lưu cá nhân ❤️</h3>
-                        <p class="text-slate-500 text-[11px]">${currentUser ? 'Đã đồng bộ trên đám mây của bạn.' : 'Đang lưu trên thiết bị (Hãy đăng nhập để đồng bộ).'}</p>
+                        <p class="text-slate-500 text-[11px]">Được lưu trữ trực tiếp trên thiết bị của bạn.</p>
                     </div>
                     ${savedPlaces.length === 0 ? `
                         <div class="text-center py-12 bg-white rounded-2xl border border-slate-100 p-6">
                             <i data-lucide="bookmark-minus" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
                             <p class="font-bold text-slate-700">Chưa có quán nào được lưu</p>
+                            <p class="text-[11px] text-slate-400 mt-1">Bấm biểu tượng bookmark trên thẻ quán để lưu lại nhé.</p>
                         </div>
                     ` : `
                         <div class="space-y-3">
@@ -790,61 +708,48 @@
             `;
         }
 
+        // Tab Đóng góp quán ăn chung thay thế cho Profile
         function renderProfileView() {
             const total = places.length;
             const savedCount = savedIds.length;
 
-            if (!currentUser) {
-                return `
-                    <div class="p-4 space-y-4 text-xs">
-                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
-                            <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">👤</div>
-                            <div>
-                                <h3 class="font-bold text-slate-800 text-sm">Tài khoản sinh viên</h3>
-                                <p class="text-[11px] text-slate-500 mt-1">Đăng nhập để đồng bộ quán đã lưu và đóng góp lên mây.</p>
-                            </div>
-                            <button onclick="openAuthModal('login')" class="w-full py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100">
-                                Đăng nhập / Đăng ký
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
             return `
                 <div class="p-4 space-y-4 text-xs">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm text-center space-y-3">
-                        <div class="w-16 h-16 bg-gradient-to-tr from-orange-500 to-amber-500 text-white rounded-2xl flex items-center justify-center mx-auto text-xl font-bold shadow-lg shadow-orange-100">
-                            ${currentUser.email.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-sm">${currentUser.email}</h3>
-                            <p class="text-[11px] text-emerald-600 font-medium mt-0.5">● Đã kết nối tài khoản đám mây</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                            <div class="p-2 bg-slate-50 rounded-xl">
-                                <p class="text-slate-400 text-[10px]">Tổng quán chung</p>
-                                <p class="font-bold text-slate-800 text-sm">${total} quán</p>
+                    <div class="bg-gradient-to-r from-orange-500 to-amber-500 p-5 rounded-2xl text-white shadow-md shadow-orange-100 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-xl">🍲</div>
+                            <div>
+                                <h3 class="font-bold text-sm">Đóng góp quán ăn chung</h3>
+                                <p class="text-[11px] text-orange-100">Chia sẻ địa điểm ngon để cùng xây dựng cộng đồng sinh viên Đà Nẵng!</p>
                             </div>
-                            <div class="p-2 bg-slate-50 rounded-xl">
-                                <p class="text-slate-400 text-[10px]">Đã lưu cloud</p>
-                                <p class="font-bold text-orange-600 text-sm">${savedCount} quán</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl">
+                                <p class="text-orange-100 text-[10px]">Tổng quán chung</p>
+                                <p class="font-bold text-white text-sm">${total} quán</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl">
+                                <p class="text-orange-100 text-[10px]">Quán bạn đã lưu</p>
+                                <p class="font-bold text-white text-sm">${savedCount} quán</p>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-100">
-                        <button onclick="openAddModal()" class="w-full p-3.5 text-left flex items-center justify-between hover:bg-slate-50 transition">
-                            <div class="flex items-center space-x-2.5 text-slate-700 font-medium">
-                                <i data-lucide="plus-circle" class="w-4 h-4 text-orange-500"></i>
-                                <span>Đóng góp quán ăn chung</span>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
-                        </button>
-                        <button onclick="handleLogout()" class="w-full p-3.5 text-left flex items-center justify-between hover:bg-slate-50 transition text-rose-600">
-                            <div class="flex items-center space-x-2.5 font-medium">
-                                <i data-lucide="log-out" class="w-4 h-4"></i>
-                                <span>Đăng xuất tài khoản</span>
-                            </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
+                        <h4 class="font-bold text-slate-800 text-xs">💡 Tại sao nên đóng góp quán?</h4>
+                        <ul class="space-y-2 text-slate-600 text-[11px]">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-orange-500 font-bold">✓</span>
+                                <span>Giúp các bạn sinh viên khóa mới hoặc trường khác tìm được quán ăn ngon, bổ, rẻ gần khu vực học tập.</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-orange-500 font-bold">✓</span>
+                                <span>Dữ liệu sẽ được cập nhật trực tiếp lên hệ thống chung để mọi người cùng tham khảo ngay lập tức.</span>
+                            </li>
+                        </ul>
+                        <button onclick="openAddModal()" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100 flex items-center justify-center space-x-1.5">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span>Thêm quán ăn mới ngay</span>
                         </button>
                     </div>
                 </div>
@@ -864,130 +769,10 @@
                 showToast('Đã bỏ lưu quán');
             } else {
                 savedIds.push(id);
-                showToast('Đã lưu quán');
+                showToast('Đã lưu quán thành công');
             }
             localStorage.setItem('student_danang_saved_ids', JSON.stringify(savedIds));
-            syncSavedToFirebase();
             renderTabContent();
-        }
-
-        // Đồng bộ dữ liệu Lưu vào Firebase Cloud
-        function syncSavedToFirebase() {
-            if (!currentUser) return;
-            const { db, set, ref } = window.authModules;
-            const userSavedRef = ref(db, `users/${currentUser.uid}/savedPlaces`);
-            set(userSavedRef, savedIds);
-        }
-
-        function loadUserDataFromFirebase(uid) {
-            const { get, ref, db } = window.authModules;
-            const userSavedRef = ref(db, `users/${uid}/savedPlaces`);
-            get(userSavedRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    savedIds = snapshot.val() || [];
-                } else {
-                    savedIds = JSON.parse(localStorage.getItem('student_danang_saved_ids')) || [];
-                }
-                renderTabContent();
-            }).catch(() => {
-                savedIds = JSON.parse(localStorage.getItem('student_danang_saved_ids')) || [];
-                renderTabContent();
-            });
-        }
-
-        function openAuthModal(mode = 'login') {
-            isRegisterMode = (mode === 'register');
-            updateAuthModalUI();
-            document.getElementById('authForm').reset();
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.add('hidden');
-        }
-
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            updateAuthModalUI();
-        }
-
-        function updateAuthModalUI() {
-            const title = document.getElementById('authModalTitle');
-            const btn = document.getElementById('authSubmitBtn');
-            const toggleText = document.getElementById('authToggleText');
-            const toggleBtn = document.getElementById('authToggleBtn');
-
-            if (isRegisterMode) {
-                title.innerText = 'Đăng ký tài khoản mới';
-                btn.innerText = 'Đăng ký';
-                toggleText.innerText = 'Đã có tài khoản?';
-                toggleBtn.innerText = 'Đăng nhập ngay';
-            } else {
-                title.innerText = 'Đăng nhập tài khoản';
-                btn.innerText = 'Đăng nhập';
-                toggleText.innerText = 'Chưa có tài khoản?';
-                toggleBtn.innerText = 'Đăng ký ngay';
-            }
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            const { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.authModules;
-
-            try {
-                if (isRegisterMode) {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    showToast('Đăng ký tài khoản thành công!');
-                } else {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    showToast('Đăng nhập thành công!');
-                }
-                closeAuthModal();
-                renderTabContent();
-            } catch (error) {
-                showToast('Lỗi: ' + error.message);
-            }
-        }
-
-        async function handleLogout() {
-            const { auth, signOut } = window.authModules;
-            try {
-                await signOut(auth);
-                savedIds = [];
-                showToast('Đã đăng xuất tài khoản');
-                renderTabContent();
-            } catch (error) {
-                showToast('Lỗi đăng xuất');
-            }
-        }
-
-        async function handleForgotPassword() {
-            const emailInput = document.getElementById('authEmail');
-            const email = emailInput.value.trim();
-
-            if (!email) {
-                showToast('Vui lòng nhập email của bạn trước!');
-                emailInput.focus();
-                return;
-            }
-
-            const { auth, sendPasswordResetEmail } = window.authModules;
-
-            try {
-                await sendPasswordResetEmail(auth, email);
-                showToast('Đã gửi email khôi phục mật khẩu!');
-                closeAuthModal();
-            } catch (error) {
-                let errorMsg = 'Lỗi gửi email khôi phục.';
-                if (error.code === 'auth/user-not-found') {
-                    errorMsg = 'Không tìm thấy tài khoản với email này.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'Địa chỉ email không hợp lệ.';
-                }
-                showToast(errorMsg);
-            }
         }
 
         function openAddModal() {
@@ -999,6 +784,7 @@
             document.getElementById('placeModal').classList.add('hidden');
         }
 
+        // Xử lý đóng góp quán ăn đẩy lên Firebase Realtime Database chung
         function handleFormSubmit(e) {
             e.preventDefault();
             const name = document.getElementById('placeName').value;
