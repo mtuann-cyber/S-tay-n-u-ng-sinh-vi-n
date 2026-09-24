@@ -136,7 +136,7 @@
         </nav>
     </div>
 
-    <!-- Add / Edit Modal (Cải tiến phần đóng góp quán ăn phong phú hơn) -->
+    <!-- Add / Edit Modal -->
     <div id="placeModal"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div
@@ -198,9 +198,12 @@
                             <option value="ĐH FPT Đà Nẵng">ĐH FPT Đà Nẵng</option>
                             <option value="ĐH Kiến Trúc Đà Nẵng">ĐH Kiến Trúc Đà Nẵng</option>
                             <option value="ĐH Đông Á">ĐH Đông Á</option>
+                            <option value="Phân hiệu ĐH Kinh tế TP.HCM tại ĐN">Phân hiệu ĐH Kinh tế TP.HCM tại ĐN</option>
                             <option value="CĐ Thương Mại">CĐ Thương Mại</option>
                             <option value="CĐ Nghề Đà Nẵng">CĐ Nghề Đà Nẵng</option>
                             <option value="CĐ FPT Polytechnic Đà Nẵng">CĐ FPT Polytechnic Đà Nẵng</option>
+                            <option value="CĐ Lương thực - Thực phẩm">CĐ Lương thực - Thực phẩm</option>
+                            <option value="CĐ Quốc tế Pegasus">CĐ Quốc tế Pegasus</option>
                             <option value="Khu vực Khác">Khu vực Khác</option>
                         </select>
                     </div>
@@ -464,6 +467,9 @@
         let places = [...defaultPlaces];
         // Lưu trữ cá nhân trên thiết bị (localStorage)
         let savedIds = JSON.parse(localStorage.getItem('student_danang_saved_ids')) || [];
+        // Lưu trữ các quán đóng góp riêng của người dùng lưu trên localStorage đảm bảo hoạt động độc lập không bị mất dữ liệu
+        let localContributedPlaces = JSON.parse(localStorage.getItem('student_danang_local_contribs')) || [];
+
         let currentTab = 'explore';
         let currentCategory = 'Tất cả';
         let currentPriceFilter = 'Tất cả';
@@ -471,27 +477,42 @@
         let currentSearchQuery = '';
         let selectedPlaceIdForDetail = null;
 
-        // Đồng bộ dữ liệu realtime từ Firebase (nếu có)
+        // Đồng bộ dữ liệu realtime từ Firebase kết hợp localStorage
         window.initFirebaseSync = function () {
             window.firebaseModules.onValue(window.dbRef, (snapshot) => {
                 const data = snapshot.val();
+                let remotePlaces = [];
                 if (data) {
-                    const remotePlaces = Object.keys(data).map(key => ({
+                    remotePlaces = Object.keys(data).map(key => ({
                         id: key,
                         ...data[key]
                     }));
-                    const remoteIds = remotePlaces.map(p => p.id);
-                    const filteredDefaults = defaultPlaces.filter(dp => !remoteIds.includes(dp.id));
-                    places = [...remotePlaces, ...filteredDefaults].reverse();
-                } else {
-                    places = [...defaultPlaces].reverse();
                 }
+                
+                // Gộp dữ liệu: Remote Firebase + Local Contributed + Default Places
+                const allIds = [...remotePlaces.map(p => p.id), ...localContributedPlaces.map(p => p.id)];
+                const filteredDefaults = defaultPlaces.filter(dp => !allIds.includes(dp.id));
+                
+                places = [...remotePlaces, ...localContributedPlaces, ...filteredDefaults].reverse();
                 renderTabContent();
             }, (error) => {
-                places = [...defaultPlaces].reverse();
+                // Nếu lỗi mạng hoặc không kết nối Firebase, fallback hoàn toàn sang localStorage & default
+                const allIds = localContributedPlaces.map(p => p.id);
+                const filteredDefaults = defaultPlaces.filter(dp => !allIds.includes(dp.id));
+                places = [...localContributedPlaces, ...filteredDefaults].reverse();
                 renderTabContent();
             });
         };
+
+        // Fallback tải lần đầu nếu Firebase chưa phản hồi kịp
+        setTimeout(() => {
+            if (places.length === defaultPlaces.length && localContributedPlaces.length > 0) {
+                const allIds = localContributedPlaces.map(p => p.id);
+                const filteredDefaults = defaultPlaces.filter(dp => !allIds.includes(dp.id));
+                places = [...localContributedPlaces, ...filteredDefaults].reverse();
+                renderTabContent();
+            }
+        }, 800);
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -576,9 +597,18 @@
                             <option value="ĐH Ngoại Ngữ" ${currentUniversityFilter === 'ĐH Ngoại Ngữ' ? 'selected' : ''}>ĐH Ngoại Ngữ (UFL)</option>
                             <option value="ĐH Sư Phạm Kỹ Thuật" ${currentUniversityFilter === 'ĐH Sư Phạm Kỹ Thuật' ? 'selected' : ''}>ĐH Sư Phạm Kỹ Thuật (UTE)</option>
                             <option value="ĐH CNTT & Truyền Thông Việt - Hàn" ${currentUniversityFilter === 'ĐH CNTT & Truyền Thông Việt - Hàn' ? 'selected' : ''}>ĐH CNTT & TT Việt - Hàn (VKU)</option>
+                            <option value="Viện NC & ĐT Việt - Anh" ${currentUniversityFilter === 'Viện NC & ĐT Việt - Anh' ? 'selected' : ''}>Viện NC & ĐT Việt - Anh (VN-UK)</option>
+                            <option value="Khoa Y Dược - ĐHĐN" ${currentUniversityFilter === 'Khoa Y Dược - ĐHĐN' ? 'selected' : ''}>Khoa Y Dược - ĐHĐN</option>
                             <option value="ĐH Duy Tân" ${currentUniversityFilter === 'ĐH Duy Tân' ? 'selected' : ''}>ĐH Duy Tân</option>
                             <option value="ĐH FPT Đà Nẵng" ${currentUniversityFilter === 'ĐH FPT Đà Nẵng' ? 'selected' : ''}>ĐH FPT Đà Nẵng</option>
                             <option value="ĐH Kiến Trúc Đà Nẵng" ${currentUniversityFilter === 'ĐH Kiến Trúc Đà Nẵng' ? 'selected' : ''}>ĐH Kiến Trúc Đà Nẵng</option>
+                            <option value="ĐH Đông Á" ${currentUniversityFilter === 'ĐH Đông Á' ? 'selected' : ''}>ĐH Đông Á</option>
+                            <option value="Phân hiệu ĐH Kinh tế TP.HCM tại ĐN" ${currentUniversityFilter === 'Phân hiệu ĐH Kinh tế TP.HCM tại ĐN' ? 'selected' : ''}>Phân hiệu ĐH Kinh tế TP.HCM tại ĐN</option>
+                            <option value="CĐ Thương Mại" ${currentUniversityFilter === 'CĐ Thương Mại' ? 'selected' : ''}>CĐ Thương Mại</option>
+                            <option value="CĐ Nghề Đà Nẵng" ${currentUniversityFilter === 'CĐ Nghề Đà Nẵng' ? 'selected' : ''}>CĐ Nghề Đà Nẵng</option>
+                            <option value="CĐ FPT Polytechnic Đà Nẵng" ${currentUniversityFilter === 'CĐ FPT Polytechnic Đà Nẵng' ? 'selected' : ''}>CĐ FPT Polytechnic Đà Nẵng</option>
+                            <option value="CĐ Lương thực - Thực phẩm" ${currentUniversityFilter === 'CĐ Lương thực - Thực phẩm' ? 'selected' : ''}>CĐ Lương thực - Thực phẩm</option>
+                            <option value="CĐ Quốc tế Pegasus" ${currentUniversityFilter === 'CĐ Quốc tế Pegasus' ? 'selected' : ''}>CĐ Quốc tế Pegasus</option>
                         </select>
                     </div>
 
@@ -644,17 +674,38 @@
         }
 
         function renderMapView() {
-            const unis = ['ĐH Bách Khoa', 'ĐH Kinh Tế', 'ĐH Sư Phạm', 'ĐH Ngoại Ngữ', 'ĐH Sư Phạm Kỹ Thuật', 'ĐH CNTT & Truyền Thông Việt - Hàn', 'ĐH Duy Tân', 'ĐH FPT Đà Nẵng', 'ĐH Kiến Trúc Đà Nẵng'];
+            // Đã mở rộng danh sách đầy đủ toàn bộ các trường Đại học & Cao đẳng tại Đà Nẵng
+            const unis = [
+                'ĐH Bách Khoa', 
+                'ĐH Kinh Tế', 
+                'ĐH Sư Phạm', 
+                'ĐH Ngoại Ngữ', 
+                'ĐH Sư Phạm Kỹ Thuật', 
+                'ĐH CNTT & Truyền Thông Việt - Hàn', 
+                'Viện NC & ĐT Việt - Anh', 
+                'Khoa Y Dược - ĐHĐN', 
+                'ĐH Duy Tân', 
+                'ĐH FPT Đà Nẵng', 
+                'ĐH Kiến Trúc Đà Nẵng', 
+                'ĐH Đông Á',
+                'Phân hiệu ĐH Kinh tế TP.HCM tại ĐN',
+                'CĐ Thương Mại', 
+                'CĐ Nghề Đà Nẵng', 
+                'CĐ FPT Polytechnic Đà Nẵng',
+                'CĐ Lương thực - Thực phẩm',
+                'CĐ Quốc tế Pegasus'
+            ];
+
             return `
                 <div class="p-4 space-y-4 text-xs">
                     <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-1">
-                        <h3 class="font-bold text-slate-800 text-sm">Cụm trường đại học & cao đẳng Đà Nẵng</h3>
-                        <p class="text-slate-500 text-[11px]">Chọn khu vực trường để lọc nhanh quán ăn lân cận.</p>
+                        <h3 class="font-bold text-slate-800 text-sm">Bản đồ cụm trường Đại học & Cao đẳng Đà Nẵng</h3>
+                        <p class="text-slate-500 text-[11px]">Chọn khu vực trường để lọc nhanh quán ăn và cafe lân cận.</p>
                     </div>
                     <div class="space-y-3">
                         ${unis.map(uni => {
-                const count = places.filter(p => p.university === uni).length;
-                return `
+                            const count = places.filter(p => p.university === uni).length;
+                            return `
                                 <div onclick="filterByUniFromMap('${uni}')" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-orange-200 transition cursor-pointer flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
                                         <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center font-bold">🏫</div>
@@ -666,7 +717,7 @@
                                     <div class="p-2 bg-slate-50 rounded-xl text-slate-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
                                 </div>
                             `;
-            }).join('')}
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -708,10 +759,10 @@
             `;
         }
 
-        // Tab Đóng góp quán ăn chung thay thế cho Profile
         function renderProfileView() {
             const total = places.length;
             const savedCount = savedIds.length;
+            const localContribCount = localContributedPlaces.length;
 
             return `
                 <div class="p-4 space-y-4 text-xs">
@@ -723,28 +774,32 @@
                                 <p class="text-[11px] text-orange-100">Chia sẻ địa điểm ngon để cùng xây dựng cộng đồng sinh viên Đà Nẵng!</p>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/20">
-                            <div class="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl">
-                                <p class="text-orange-100 text-[10px]">Tổng quán chung</p>
-                                <p class="font-bold text-white text-sm">${total} quán</p>
+                        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl text-center">
+                                <p class="text-orange-100 text-[10px]">Tổng quán</p>
+                                <p class="font-bold text-white text-xs">${total}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm p-2.5 rounded-xl">
-                                <p class="text-orange-100 text-[10px]">Quán bạn đã lưu</p>
-                                <p class="font-bold text-white text-sm">${savedCount} quán</p>
+                            <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl text-center">
+                                <p class="text-orange-100 text-[10px]">Đã lưu</p>
+                                <p class="font-bold text-white text-xs">${savedCount}</p>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl text-center">
+                                <p class="text-orange-100 text-[10px]">Bạn đóng góp</p>
+                                <p class="font-bold text-white text-xs">${localContribCount}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-3">
-                        <h4 class="font-bold text-slate-800 text-xs">💡 Tại sao nên đóng góp quán?</h4>
+                        <h4 class="font-bold text-slate-800 text-xs">💡 Cơ chế đóng góp thông minh</h4>
                         <ul class="space-y-2 text-slate-600 text-[11px]">
                             <li class="flex items-start space-x-2">
                                 <span class="text-orange-500 font-bold">✓</span>
-                                <span>Giúp các bạn sinh viên khóa mới hoặc trường khác tìm được quán ăn ngon, bổ, rẻ gần khu vực học tập.</span>
+                                <span>Quán ăn bạn đóng góp sẽ được lưu ngay lập tức vào bộ nhớ thiết bị (<code class="bg-slate-100 px-1 rounded">localStorage</code>) và đồng thời gửi lên hệ thống chung.</span>
                             </li>
                             <li class="flex items-start space-x-2">
                                 <span class="text-orange-500 font-bold">✓</span>
-                                <span>Dữ liệu sẽ được cập nhật trực tiếp lên hệ thống chung để mọi người cùng tham khảo ngay lập tức.</span>
+                                <span>Giúp các bạn sinh viên toàn thành phố dễ dàng tìm kiếm quán ăn ngon, bổ, rẻ gần khu vực học tập của mình.</span>
                             </li>
                         </ul>
                         <button onclick="openAddModal()" class="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100 flex items-center justify-center space-x-1.5">
@@ -784,7 +839,7 @@
             document.getElementById('placeModal').classList.add('hidden');
         }
 
-        // Xử lý đóng góp quán ăn đẩy lên Firebase Realtime Database chung
+        // Cải tiến cơ chế thêm quán ăn: Lưu cục bộ vào localStorage trước để đảm bảo mượt mà, sau đó đồng bộ Firebase
         function handleFormSubmit(e) {
             e.preventDefault();
             const name = document.getElementById('placeName').value;
@@ -796,17 +851,25 @@
             const image = document.getElementById('placeImage').value || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80';
             const review = document.getElementById('placeReview').value;
 
-            const newPlace = { name, category, priceRange, university, address, rating, image, review };
+            const newPlaceId = 'contrib_' + Date.now();
+            const newPlace = { id: newPlaceId, name, category, priceRange, university, address, rating, image, review };
 
-            window.firebaseModules.push(window.dbRef, newPlace).then(() => {
-                closeAddModal();
-                showToast('Đã đóng góp quán thành công lên hệ thống chung!');
-            }).catch(err => {
-                places.unshift({ id: 'local_' + Date.now(), ...newPlace });
-                closeAddModal();
-                showToast('Đã thêm quán thành công!');
-                renderTabContent();
-            });
+            // Lưu trước vào localStorage của thiết bị để tránh phụ thuộc hoàn toàn vào mạng
+            localContributedPlaces.unshift(newPlace);
+            localStorage.setItem('student_danang_local_contribs', JSON.stringify(localContributedPlaces));
+
+            // Cập nhật mảng places hiện tại và render lại ngay lập tức
+            places.unshift(newPlace);
+            closeAddModal();
+            showToast('Đã đóng góp quán thành công!');
+            renderTabContent();
+
+            // Cố gắng đẩy lên Firebase Realtime Database ngầm
+            if (window.firebaseModules && window.dbRef) {
+                window.firebaseModules.push(window.dbRef, { name, category, priceRange, university, address, rating, image, review }).catch(err => {
+                    console.log('Firebase sync deferred, saved locally.');
+                });
+            }
         }
 
         function openDetailModal(id) {
