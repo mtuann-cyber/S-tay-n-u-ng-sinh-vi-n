@@ -70,7 +70,6 @@
 
         <!-- Main Scrollable Content Area -->
         <main id="mainContainer" class="flex-1 overflow-y-auto pb-24 no-scrollbar relative">
-            <!-- Loading indicator -->
             <div class="flex items-center justify-center h-full">
                 <div class="text-center space-y-2">
                     <div class="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -149,6 +148,12 @@
                             <option value="ĐH FPT Đà Nẵng">ĐH FPT Đà Nẵng</option>
                             <option value="ĐH Kiến Trúc Đà Nẵng">ĐH Kiến Trúc Đà Nẵng</option>
                             <option value="ĐH Đông Á">ĐH Đông Á</option>
+                            <option value="Phân hiệu ĐH Kinh tế TP.HCM tại ĐN">Phân hiệu ĐH Kinh tế TP.HCM tại ĐN</option>
+                            <option value="CĐ Thương Mại">CĐ Thương Mại</option>
+                            <option value="CĐ Nghề Đà Nẵng">CĐ Nghề Đà Nẵng</option>
+                            <option value="CĐ FPT Polytechnic Đà Nẵng">CĐ FPT Polytechnic Đà Nẵng</option>
+                            <option value="CĐ Lương thực - Thực phẩm">CĐ Lương thực - Thực phẩm</option>
+                            <option value="CĐ Quốc tế Pegasus">CĐ Quốc tế Pegasus</option>
                             <option value="Khu vực Khác">Khu vực Khác</option>
                         </select>
                     </div>
@@ -174,7 +179,7 @@
                     <textarea id="placeReview" rows="2" placeholder="Quán rộng, wifi mạnh..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"></textarea>
                 </div>
                 <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="closeAddModal()" class="px-3 py-2 rounded-xl border border-slate-200 text-600 hover:bg-slate-50 transition">Hủy</button>
+                    <button type="button" onclick="closeAddModal()" class="px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition">Hủy</button>
                     <button type="submit" id="submitBtn" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl transition shadow-md shadow-orange-100">Đăng lên cộng đồng</button>
                 </div>
             </form>
@@ -260,8 +265,8 @@
 
     <!-- Application JavaScript Logic -->
     <script>
-        // Sử dụng một API lưu trữ JSON công khai trên Cloud để làm kho dữ liệu chung cho tất cả mọi người
-        const BIN_URL = 'https://api.jsonbin.io/v3/b/6612d12eacd3cb34a8335349'; // Kho dữ liệu chung công khai demo
+        const BIN_URL = 'https://api.jsonbin.io/v3/b/670a4c2dae4105333a921dcd/latest';
+        const BIN_PUT_URL = 'https://api.jsonbin.io/v3/b/670a4c2dae4105333a921dcd';
         
         let places = [];
         let currentTab = 'explore';
@@ -271,20 +276,13 @@
         let currentSearchQuery = '';
         let selectedPlaceIdForDetail = null;
 
-        // Tải dữ liệu chung từ Cloud khi khởi động ứng dụng
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchPublicData();
         });
 
         async function fetchPublicData() {
             try {
-                const response = await fetch(BIN_URL, {
-                    headers: {
-                        'X-Master-Key': '$2a$10$7vP5C6uI... (hoặc bỏ qua nếu dùng public bin)' 
-                    }
-                });
-                // Nếu dùng JSONbin dạng free public read, ta có thể gọi đơn giản:
-                const res = await fetch('https://api.jsonbin.io/v3/b/670a4c2dae4105333a921dcd/latest');
+                const res = await fetch(BIN_URL);
                 const data = await res.json();
                 places = data.record.places || [];
             } catch (error) {
@@ -297,12 +295,11 @@
 
         async function savePublicDataToCloud() {
             try {
-                // Gửi dữ liệu cập nhật lên Cloud để tất cả người dùng khác đều thấy
-                await fetch('https://api.jsonbin.io/v3/b/670a4c2dae4105333a921dcd', {
+                await fetch(BIN_PUT_URL, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Master-Key': '$2a$10$DEMO_KEY' // Bạn có thể tạo tài khoản miễn phí trên jsonbin.io để lấy Key riêng
+                        'X-Master-Key': '$2a$10$DEMO_KEY' 
                     },
                     body: JSON.stringify({ places: places })
                 });
@@ -321,7 +318,6 @@
             }, 2500);
         }
 
-        // Tab Switching
         function switchTab(tab) {
             currentTab = tab;
             ['explore', 'map', 'saved', 'profile'].forEach(t => {
@@ -383,12 +379,28 @@
                             <option value="Bình dân (25k-50k)" ${currentPriceFilter === 'Bình dân (25k-50k)' ? 'selected' : ''}>⭐ Bình dân (25k-50k)</option>
                             <option value="Hơi cao (>50k)" ${currentPriceFilter === 'Hơi cao (>50k)' ? 'selected' : ''}>💎 Hơi cao (&gt;50k)</option>
                         </select>
+                        
                         <select id="uniFilter" onchange="handleUniFilter(this)" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm">
-                            <option value="Tất cả" ${currentUniversityFilter === 'Tất cả' ? 'selected' : ''}>Khu vực: Tất cả</option>
+                            <option value="Tất cả" ${currentUniversityFilter === 'Tất cả' ? 'selected' : ''}>Khu vực: Tất cả ĐH & CĐ</option>
                             <option value="ĐH Bách Khoa" ${currentUniversityFilter === 'ĐH Bách Khoa' ? 'selected' : ''}>ĐH Bách Khoa (DUT)</option>
                             <option value="ĐH Kinh Tế" ${currentUniversityFilter === 'ĐH Kinh Tế' ? 'selected' : ''}>ĐH Kinh Tế (DUE)</option>
                             <option value="ĐH Sư Phạm" ${currentUniversityFilter === 'ĐH Sư Phạm' ? 'selected' : ''}>ĐH Sư Phạm (UED)</option>
+                            <option value="ĐH Ngoại Ngữ" ${currentUniversityFilter === 'ĐH Ngoại Ngữ' ? 'selected' : ''}>ĐH Ngoại Ngữ (UFL)</option>
+                            <option value="ĐH Sư Phạm Kỹ Thuật" ${currentUniversityFilter === 'ĐH Sư Phạm Kỹ Thuật' ? 'selected' : ''}>ĐH Sư Phạm Kỹ Thuật (UTE)</option>
+                            <option value="ĐH CNTT & Truyền Thông Việt - Hàn" ${currentUniversityFilter === 'ĐH CNTT & Truyền Thông Việt - Hàn' ? 'selected' : ''}>ĐH CNTT & TT Việt - Hàn (VKU)</option>
+                            <option value="Viện NC & ĐT Việt - Anh" ${currentUniversityFilter === 'Viện NC & ĐT Việt - Anh' ? 'selected' : ''}>Viện NC & ĐT Việt - Anh (VN-UK)</option>
+                            <option value="Khoa Y Dược - ĐHĐN" ${currentUniversityFilter === 'Khoa Y Dược - ĐHĐN' ? 'selected' : ''}>Khoa Y Dược - ĐHĐN</option>
                             <option value="ĐH Duy Tân" ${currentUniversityFilter === 'ĐH Duy Tân' ? 'selected' : ''}>ĐH Duy Tân</option>
+                            <option value="ĐH FPT Đà Nẵng" ${currentUniversityFilter === 'ĐH FPT Đà Nẵng' ? 'selected' : ''}>ĐH FPT Đà Nẵng</option>
+                            <option value="ĐH Kiến Trúc Đà Nẵng" ${currentUniversityFilter === 'ĐH Kiến Trúc Đà Nẵng' ? 'selected' : ''}>ĐH Kiến Trúc Đà Nẵng</option>
+                            <option value="ĐH Đông Á" ${currentUniversityFilter === 'ĐH Đông Á' ? 'selected' : ''}>ĐH Đông Á</option>
+                            <option value="Phân hiệu ĐH Kinh tế TP.HCM tại ĐN" ${currentUniversityFilter === 'Phân hiệu ĐH Kinh tế TP.HCM tại ĐN' ? 'selected' : ''}>Phân hiệu ĐH Kinh tế TP.HCM tại ĐN</option>
+                            <option value="CĐ Thương Mại" ${currentUniversityFilter === 'CĐ Thương Mại' ? 'selected' : ''}>CĐ Thương Mại</option>
+                            <option value="CĐ Nghề Đà Nẵng" ${currentUniversityFilter === 'CĐ Nghề Đà Nẵng' ? 'selected' : ''}>CĐ Nghề Đà Nẵng</option>
+                            <option value="CĐ FPT Polytechnic Đà Nẵng" ${currentUniversityFilter === 'CĐ FPT Polytechnic Đà Nẵng' ? 'selected' : ''}>CĐ FPT Polytechnic Đà Nẵng</option>
+                            <option value="CĐ Lương thực - Thực phẩm" ${currentUniversityFilter === 'CĐ Lương thực - Thực phẩm' ? 'selected' : ''}>CĐ Lương thực - Thực phẩm</option>
+                            <option value="CĐ Quốc tế Pegasus" ${currentUniversityFilter === 'CĐ Quốc tế Pegasus' ? 'selected' : ''}>CĐ Quốc tế Pegasus</option>
+                            <option value="Khu vực Khác" ${currentUniversityFilter === 'Khu vực Khác' ? 'selected' : ''}>Khu vực Khác</option>
                         </select>
                     </div>
 
@@ -449,13 +461,33 @@
             `;
         }
 
-        // --- MAP VIEW ---
+        // --- MAP VIEW (Đã khôi phục toàn bộ danh sách trường) ---
         function renderMapView() {
-            const unis = ['ĐH Bách Khoa', 'ĐH Kinh Tế', 'ĐH Sư Phạm', 'ĐH Duy Tân', 'Khu vực Khác'];
+            const unis = [
+                'ĐH Bách Khoa', 
+                'ĐH Kinh Tế', 
+                'ĐH Sư Phạm', 
+                'ĐH Ngoại Ngữ', 
+                'ĐH Sư Phạm Kỹ Thuật', 
+                'ĐH CNTT & Truyền Thông Việt - Hàn', 
+                'Viện NC & ĐT Việt - Anh', 
+                'Khoa Y Dược - ĐHĐN', 
+                'ĐH Duy Tân', 
+                'ĐH FPT Đà Nẵng', 
+                'ĐH Kiến Trúc Đà Nẵng', 
+                'ĐH Đông Á',
+                'Phân hiệu ĐH Kinh tế TP.HCM tại ĐN',
+                'CĐ Thương Mại', 
+                'CĐ Nghề Đà Nẵng', 
+                'CĐ FPT Polytechnic Đà Nẵng',
+                'CĐ Lương thực - Thực phẩm',
+                'CĐ Quốc tế Pegasus',
+                'Khu vực Khác'
+            ];
             return `
                 <div class="p-4 space-y-4 text-xs">
                     <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-1">
-                        <h3 class="font-bold text-slate-800 text-sm">Bản đồ cụm trường ĐH Đà Nẵng</h3>
+                        <h3 class="font-bold text-slate-800 text-sm">Bản đồ cụm trường ĐH & CĐ Đà Nẵng</h3>
                         <p class="text-slate-500 text-[11px]">Chọn khu vực để xem quán do cộng đồng sinh viên đóng góp.</p>
                     </div>
                     <div class="space-y-3">
@@ -568,7 +600,6 @@
             document.getElementById('placeModal').classList.add('hidden');
         }
 
-        // Xử lý thêm quán và đồng bộ lên Cloud chung cho mọi người
         async function handleFormSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
